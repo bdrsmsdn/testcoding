@@ -99,7 +99,9 @@ const OrdersUser = () => {
   };
 
   const handleAddOrder = async (storedData) => {
-    console.log(storedData._id);
+    if (newOrder.dropoffDate < newOrder.pickupDate) {
+      alert('Something error');
+    }
     const dt = {
       car: newOrder.car,
       user: storedData._id,

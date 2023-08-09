@@ -83,6 +83,10 @@ router.post('/', async (req, res) => {
 
     const decoded = jwt.verify(token, secKey);
 
+    if (req.body.dropoffDate < req.body.pickupDate) {
+      res.status(401).json({ error: true, message: 'Something went wrong.' });
+    }
+
     if (decoded) {
       const newOrder = {
         pickupLoc: req.body.pickupLoc,

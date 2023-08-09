@@ -6,6 +6,8 @@ const Cars = () => {
   const [showDropdown, setShowDropdown] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalOpen2, setModalOpen2] = useState(false);
+  const [viewImageModalOpen, setViewImageModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
   const [newCar, setNewCar] = useState({
     carName: '',
     carType: '',
@@ -53,12 +55,18 @@ const Cars = () => {
     setShowDropdown(showDropdown === carId ? null : carId);
   };
 
-  const handleImageUpload = (event) => {
+  const handleImageUpload = async (event) => {
     const file = event.target.files[0];
-    setNewCar((prevCar) => ({
-      ...prevCar,
-      image: file,
-    }));
+    try {
+      const imagePath = URL.createObjectURL(file);
+      console.log(imagePath);
+      setNewCar((prevCar) => ({
+        ...prevCar,
+        image: imagePath,
+      }));
+    } catch (error) {
+      console.error('Error uploading image:', error);
+    }
   };
 
   const openModal = () => {
@@ -78,6 +86,16 @@ const Cars = () => {
       monthRate: '',
       image: null,
     });
+  };
+
+  const handleViewImage = (imagePath) => {
+    setSelectedImage(imagePath);
+    setViewImageModalOpen(true);
+  };
+
+  const closeViewImageModal = () => {
+    setViewImageModalOpen(false);
+    setSelectedImage(null);
   };
 
   const handleAddCar = async (storedData) => {
@@ -162,6 +180,36 @@ const Cars = () => {
     setModalOpen2(true);
   };
 
+  function ribuan(number) {
+    const nmstr = number.toString();
+    const formattedNum = nmstr.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    if (nmstr.length > 6) {
+      return formattedNum.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
+    }
+    return formattedNum;
+  }
+
+  const handleInputChangeHour = (e) => {
+    const rawValue = e.target.value.replace(/,/g, '');
+    const formattedValue = ribuan(rawValue);
+
+    setEditingCar({ ...editingCar, hourRate: formattedValue });
+  };
+
+  const handleInputChangeDay = (e) => {
+    const rawValue = e.target.value.replace(/,/g, '');
+    const formattedValue = ribuan(rawValue);
+
+    setEditingCar({ ...editingCar, dayRate: formattedValue });
+  };
+
+  const handleInputChangeMonth = (e) => {
+    const rawValue = e.target.value.replace(/,/g, '');
+    const formattedValue = ribuan(rawValue);
+
+    setEditingCar({ ...editingCar, monthRate: formattedValue });
+  };
+
   return (
     <div>
       <Navbar />
@@ -194,9 +242,9 @@ const Cars = () => {
                   <td className="border px-4 py-2">{car.carType}</td>
                   <td className="border px-4 py-2">{car.rating}</td>
                   <td className="border px-4 py-2">{car.fuel}</td>
-                  <td className="border px-4 py-2">{car.hourRate}</td>
-                  <td className="border px-4 py-2">{car.dayRate}</td>
-                  <td className="border px-4 py-2">{car.monthRate}</td>
+                  <td className="border px-4 py-2">{ribuan(car.hourRate)}</td>
+                  <td className="border px-4 py-2">{ribuan(car.dayRate)}</td>
+                  <td className="border px-4 py-2">{ribuan(car.monthRate)}</td>
                   <td className="border px-4 py-2">
                     <div className="relative inline-block text-left">
                       <button
@@ -313,13 +361,7 @@ const Cars = () => {
               </div>
               <div className="mt-4">
                 <label className="block text-sm font-medium text-gray-700">Image</label>
-                <input
-                  type="file"
-                  name="image"
-                  accept="image/*"
-                  onChange={(e) => setNewCar({ ...newCar, image: e.target.files[0] })}
-                  className="mt-1 block w-full py-2 px-4 rounded-lg border focus:outline-none focus:ring focus:border-blue-300"
-                />
+                <input type="file" name="image" accept="image/*" onChange={handleImageUpload} className="mt-1 block w-full py-2 px-4 rounded-lg border focus:outline-none focus:ring focus:border-blue-300" />
               </div>
               <div className="mt-4">
                 <button
@@ -387,33 +429,15 @@ const Cars = () => {
               </div>
               <div className="mt-4">
                 <label className="block text-sm font-medium text-gray-700">Hourly Rate</label>
-                <input
-                  type="text"
-                  name="hourRate"
-                  value={editingCar.hourRate}
-                  onChange={(e) => setEditingCar({ ...editingCar, hourRate: e.target.value })}
-                  className="mt-1 block w-full py-2 px-4 rounded-lg border focus:outline-none focus:ring focus:border-blue-300"
-                />
+                <input type="text" name="hourRate" value={ribuan(editingCar.hourRate)} onChange={handleInputChangeHour} className="mt-1 block w-full py-2 px-4 rounded-lg border focus:outline-none focus:ring focus:border-blue-300" />
               </div>
               <div className="mt-4">
                 <label className="block text-sm font-medium text-gray-700">Daily Rate</label>
-                <input
-                  type="text"
-                  name="dayRate"
-                  value={editingCar.dayRate}
-                  onChange={(e) => setEditingCar({ ...editingCar, dayRate: e.target.value })}
-                  className="mt-1 block w-full py-2 px-4 rounded-lg border focus:outline-none focus:ring focus:border-blue-300"
-                />
+                <input type="text" name="dayRate" value={ribuan(editingCar.dayRate)} onChange={handleInputChangeDay} className="mt-1 block w-full py-2 px-4 rounded-lg border focus:outline-none focus:ring focus:border-blue-300" />
               </div>
               <div className="mt-4">
                 <label className="block text-sm font-medium text-gray-700">Monthly Rate</label>
-                <input
-                  type="text"
-                  name="monthRate"
-                  value={editingCar.monthRate}
-                  onChange={(e) => setEditingCar({ ...editingCar, monthRate: e.target.value })}
-                  className="mt-1 block w-full py-2 px-4 rounded-lg border focus:outline-none focus:ring focus:border-blue-300"
-                />
+                <input type="text" name="monthRate" value={ribuan(editingCar.monthRate)} onChange={handleInputChangeMonth} className="mt-1 block w-full py-2 px-4 rounded-lg border focus:outline-none focus:ring focus:border-blue-300" />
               </div>
               <div className="mt-4">
                 <label className="block text-sm font-medium text-gray-700">Image</label>
@@ -444,6 +468,20 @@ const Cars = () => {
             </form>
           </div>
         </div>
+        {viewImageModalOpen && (
+          <div className="fixed inset-0 flex items-center justify-center z-10">
+            <div className="fixed inset-0 bg-black opacity-60" onClick={closeViewImageModal}></div>
+            <div className="bg-white p-4 rounded-lg shadow-lg z-20 max-w-full">
+              <img src={selectedImage} alt="Car" className="max-h-[80vh] max-w-full object-contain" />
+              <button
+                className="mt-4 inline-flex justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 border border-transparent rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200"
+                onClick={closeViewImageModal}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
